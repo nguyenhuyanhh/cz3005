@@ -73,10 +73,10 @@ The set of FOL for the sentences describing the smart phone industry is:
     \item Develop\,(SumSum, GalacticaS3)
     \item Boss\,(Stevey)
     \item Steal\,(Stevey, GalacticaS3, SumSum)
-    \item Steal\,(Boss\,(x), Business\,(y), Rival\,(z)) \(\to \)
-    Unethical\,(Boss\,(x))
-    \item Competitor\,(x, Appy) \(\to \) Rival\,(x)
-    \item SmartPhoneTechnology\,(x) \(\to \) Business\,(x)
+    \item \(\forall x,y,z\) Boss\,(x) \(\land \) Business\,(y) \(\land \)
+    Rival\,(z) \(\land \) Steal\,(x, y, z) \(\to \) Unethical\,(x)
+    \item \(\forall x\) Competitor\,(x, Appy) \(\to \) Rival\,(x)
+    \item \(\forall x\) SmartPhoneTechnology\,(x) \(\to \) Business\,(x)
 \end{itemize}
 
 The equivalent statements in Prolog are:
