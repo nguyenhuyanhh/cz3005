@@ -27,7 +27,7 @@
     breaklines=true,
     captionpos=b,
     keepspaces=true,
-    numbers=left,
+    % numbers=left,
     numbersep=5pt,
     showspaces=false,
     showstringspaces=false,
@@ -63,5 +63,54 @@
     
     \end{center}
 \end{titlepage}
+
+\section*{Exercise 1: The Smart Phone Rivalry}
+
+The set of FOL for the sentences describing the smart phone industry is:
+\begin{itemize}
+    \item Competitor\,(SumSum, Appy)
+    \item SmartPhoneTechnology\,(GalacticaS3)
+    \item Develop\,(SumSum, GalacticaS3)
+    \item Boss\,(Stevey)
+    \item Steal\,(Stevey, GalacticaS3, SumSum)
+    \item Steal\,(Boss\,(x), Business\,(y), Rival\,(z)) \(\to \)
+    Unethical\,(Boss\,(x))
+    \item Competitor\,(x, Appy) \(\to \) Rival\,(x)
+    \item SmartPhoneTechnology\,(x) \(\to \) Business\,(x)
+\end{itemize}
+
+The equivalent statements in Prolog are:
+
+\begin{lstlisting}
+competitor(sumsum,appy).
+smartphone_tech(galactica_s3).
+develop(galactica_s3,sumsum).
+boss(stevey).
+steal(stevey,galactica_s3,sumsum).
+rival(X) :- competitor(X,appy).
+business(X) :- smartphone_tech(X).
+unethical(X):- boss(X), business(Y), rival(Z), steal(X,Y,Z).
+\end{lstlisting}
+
+To prove that Stevey is unethical, we enter \texttt{unethical\,(stevey)} into
+Prolog. The execution trace is as follows:
+
+\begin{lstlisting}
+    Call: (8) unethical(stevey) ? creep
+    Call: (9) boss(stevey) ? creep
+    Exit: (9) boss(stevey) ? creep
+    Call: (9) business(_7690) ? creep
+    Call: (10) smartphone_tech(_7690) ? creep
+    Exit: (10) smartphone_tech(galactica_s3) ? creep
+    Exit: (9) business(galactica_s3) ? creep
+    Call: (9) rival(_7690) ? creep
+    Call: (10) competitor(_7690, appy) ? creep
+    Exit: (10) competitor(sumsum, appy) ? creep
+    Exit: (9) rival(sumsum) ? creep
+    Call: (9) steal(stevey, galactica_s3, sumsum) ? creep
+    Exit: (9) steal(stevey, galactica_s3, sumsum) ? creep
+    Exit: (8) unethical(stevey) ? creep
+true.
+\end{lstlisting}
 
 \end{document}
