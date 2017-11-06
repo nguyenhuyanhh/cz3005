@@ -16,4 +16,4 @@ rival(X) :- competitor(X,appy).
 business(X) :- smartphone_tech(X).
 
 % It is unethical for a Boss to steal business from rival companies
-unethical(X):- boss(X), business(Y), rival(Z), steal(X,Y,Z).
+unethical(X) :- boss(X), business(Y), rival(Z), steal(X,Y,Z).
