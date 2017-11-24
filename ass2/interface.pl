@@ -58,19 +58,19 @@ query_addon_loop :-
 
 % Query for each type
 query_bread :- options(breads),nl,write('Please input your bread: '),nl,
-    query_bread_loop.
+    query_bread_loop,nl.
 query_main :- options(mains),nl,write('Please input your main: '),nl,
-    query_main_loop.
+    query_main_loop,nl.
 query_cheese :- options(cheeses),nl,write('Please input your cheese: '),nl,
-    query_cheese_loop.
+    query_cheese_loop,nl.
 query_veg :- options(vegs),nl,write('Please input your vegs (0 to end): '),nl,
-    query_veg_loop.
+    query_veg_loop,nl.
 query_sauce :- options(sauces),nl,write('Please input your sauces (0 to end): '),nl,
-    query_sauce_loop.
+    query_sauce_loop,nl.
 query_cookie :- options(cookies),nl,write('Please input your cookies (0 to end): '),nl,
-    query_cookie_loop.
+    query_cookie_loop,nl.
 query_addon :- options(addons),nl,write('Please input your addons (0 to end): '),nl,
-    query_addon_loop.
+    query_addon_loop,nl.
 
 % Declare dynamic predicates to store results
 :- dynamic meal/1, bread/1, main/1, cheese/1, veg/1, sauce/1, cookie/1, addon/1.
@@ -127,9 +127,16 @@ meal_value :-
 exec:-
     write('Please choose your meal type (one of normal, veggie, vegan, value)?'),nl,
     read(Meal),
-    ( (Meal == veggie) -> meal_veggie, assert(meal(veggie)) ;
-        (Meal == vegan) -> meal_vegan, assert(meal(vegan)) ;
-            (Meal == value) -> meal_value, assert(meal(value)) ;
+    ( (Meal == veggie) -> 
+        write('meal = '), write(meal), nl,
+        meal_veggie, assert(meal(veggie)) ;
+        (Meal == vegan) ->
+            write('meal = '), write(meal), nl,
+            meal_vegan, assert(meal(vegan)) ;
+            (Meal == value) ->
+                write('meal = '), write(meal), nl,
+                meal_value, assert(meal(value)) ;
+                write('meal = normal'), nl,
                 meal_normal, assert(meal(normal)) ), % normal by default
     write('----------------------------------------------'),nl,
     write('----------------------------------------------'),nl,

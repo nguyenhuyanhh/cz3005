@@ -145,9 +145,16 @@ vegan or value; the corresponding \texttt{meal\_*/0} predicate is called and
 exec:-
     write('Please choose your meal type (one of normal, veggie, vegan, value)?'),nl,
     read(Meal),
-    ( (Meal == veggie) -> meal_veggie, assert(meal(veggie)) ;
-        (Meal == vegan) -> meal_vegan, assert(meal(vegan)) ;
-            (Meal == value) -> meal_value, assert(meal(value)) ;
+    ( (Meal == veggie) -> 
+        write('meal = '), write(meal), nl,
+        meal_veggie, assert(meal(veggie)) ;
+        (Meal == vegan) ->
+            write('meal = '), write(meal), nl,
+            meal_vegan, assert(meal(vegan)) ;
+            (Meal == value) ->
+                write('meal = '), write(meal), nl,
+                meal_value, assert(meal(value)) ;
+                write('meal = normal'), nl,
                 meal_normal, assert(meal(normal)) ), % normal by default
     write('----------------------------------------------'),nl,
     write('----------------------------------------------'),nl,
@@ -281,20 +288,24 @@ true.
 ----------------------------------------------
 Please choose your meal type (one of normal, veggie, vegan, value)?
 |: normal.
+meal = normal
 breads = italian, heartyitalian, wheat, honeyoat, wholegrain, parmesan, flatbread, wrap, salad.
 Please input your bread:
 |: italian.
 bread = italian
+
 mains = ham, turkey, coldcut, bbqchicken, tuna, eggmayo, meatball.
 Please input your main:
 |: hello.
 Invalid option, try again!
 |: ham.
 main = ham
+
 cheeses = american, monterrey, none.
 Please input your cheese:
 |: none.
 cheese = none
+
 vegs = lettuce, tomato, cucumber, capsicum, onion, jalapeno, pickle, avocado.
 Please input your vegs (0 to end):
 |: avocado.
@@ -304,19 +315,23 @@ veg = tomato
 |: onion.
 veg = onion
 |: 0.
+
 sauces = bbq, honeymustard, mustard, sweetonion, redwine, mayonnaise, chipottle, ranch, vinegar.
 Please input your sauces (0 to end):
 |: bbq.
 sauce = bbq
 |: 0.
+
 cookies = chocchip, doublechoc, walnut, macnut, raspberry, brownie.
 Please input your cookies (0 to end):
 |: 0.
+
 addons = drink, soup, chips.
 Please input your addons (0 to end):
 |: drink.
 addon = drink
 |: 0.
+
 ----------------------------------------------
 ----------------------------------------------
 Your meal type: normal
