@@ -82,7 +82,6 @@ as helper predicates \texttt{options/1} to display the lists and
 \texttt{selected/2} to choose a list option.
 
 \begin{lstlisting}
-% Display all options in a list
 options_list([]). % empty list
 options_list([H]) :- write(H), write('.'). % final list item
 options_list([H|T]) :- write(H), write(', '), options_list(T), !. % normal list
@@ -94,7 +93,6 @@ options(sauces):- sauces(L), write('sauces = '), options_list(L).
 options(cookies):- cookies(L), write('cookies = '), options_list(L).
 options(addons):- addons(L), write('addons = '), options_list(L).
 
-% Select an option
 selected(X, breads) :- breads(L), member(X, L), write('bread = '), write(X), !.
 selected(X, mains) :- mains(L), member(X, L), write('main = '), write(X), !.
 selected(X, cheeses) :- cheeses(L), member(X, L), write('cheese = '), write(X), !.
@@ -103,7 +101,6 @@ selected(X, sauces) :- sauces(L), member(X, L), write('sauce = '), write(X), !.
 selected(X, cookies) :- cookies(L), member(X, L), write('cookie = '), write(X), !.
 selected(X, addons) :- addons(L), member(X, L), write('addon = '), write(X), !.
 
-% Lists of options
 breads([italian, heartyitalian, wheat, honeyoat, wholegrain, parmesan, flatbread, wrap, salad]).
 mains([ham, turkey, coldcut, bbqchicken, tuna, eggmayo, meatball]).
 cheeses([american, monterrey, none]).
