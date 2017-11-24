@@ -22,7 +22,7 @@ selected(X, addons) :- addons(L), member(X, L), write('addon = '), write(X), !.
 % Lists of options
 breads([italian, heartyitalian, wheat, honeyoat, wholegrain, parmesan, flatbread, wrap, salad]).
 mains([ham, turkey, coldcut, bbqchicken, tuna, eggmayo, meatball]).
-cheeses([american, monterrey]).
+cheeses([american, monterrey, none]).
 vegs([lettuce, tomato, cucumber, capsicum, onion, jalapeno, pickle, avocado]).
 sauces([bbq, honeymustard, mustard, sweetonion, redwine, mayonnaise, chipottle, ranch, vinegar]).
 cookies([chocchip, doublechoc, walnut, macnut, raspberry, brownie]).

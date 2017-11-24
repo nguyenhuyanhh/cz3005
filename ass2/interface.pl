@@ -1,78 +1,83 @@
-% Load models
+% Load model
 :- ['subway.pl'].
 
 % Help message
 help :- write('Enter start. to start the process.').
 
-% Query for each type
-query_bread :- 
-    options(breads),nl,
-    write('Please input your bread: '),nl,
+% Query looping for each type, error-checking and handle multiple values
+query_bread_loop :-
     read(X),
-    selected(X, breads),nl,
-    assert(bread(X)).
-query_main :-
-    options(mains),nl,
-    write('Please input your main: '),nl,
+    ( selected(X, breads) -> % if true then proceed
+        nl, assert(bread(X)) ;
+        write('Invalid option, try again!'),nl, % else try again 
+        query_bread_loop ).
+query_main_loop :-
     read(X),
-    selected(X, mains),nl,
-    assert(main(X)).
-query_cheese :-
-    options(cheeses),nl,
-    write('Please input your cheese: '),nl,
+    ( selected(X, mains) -> % if true then proceed
+        nl, assert(main(X)) ;
+        write('Invalid option, try again!'),nl, % else try again
+        query_main_loop ).
+query_cheese_loop :-
     read(X),
-    selected(X, cheeses),nl,
-    assert(cheese(X)).
+    ( selected(X, cheeses) -> % if true then proceed
+        nl, assert(cheese(X)) ;
+        write('Invalid option, try again!'),nl, % else try again 
+        query_cheese_loop ).
 query_veg_loop :-
     read(X),
-    ( not(X == 0) ->
-    selected(X, vegs),nl,
-    assert(veg(X)),
-    query_veg_loop ;
-    true ).
-query_veg :-
-    options(vegs),nl,
-    write('Please input your vegs (0 to end): '),nl,
-    query_veg_loop.
+    ( not(X == 0) -> % if input is 0, proceed to next list
+        ( selected(X, vegs) -> % if true then proceed
+            nl, assert(veg(X)) ;
+            write('Invalid option, try again!'),nl ), % else try again         
+        query_veg_loop ;
+        true ).
 query_sauce_loop :-
     read(X),
-    ( not(X == 0) ->
-    selected(X, sauces),nl,
-    assert(sauce(X)),
-    query_sauce_loop ;
-    true ).
-query_sauce :-
-    options(sauces),nl,
-    write('Please input your sauces (0 to end): '),nl,
-    query_sauce_loop.
+    ( not(X == 0) -> % if input is 0, proceed to next list
+        ( selected(X, sauces) -> % if true then proceed
+            nl, assert(sauce(X)) ;
+            write('Invalid option, try again!'),nl ), % else try again
+        query_sauce_loop ;
+        true ).
 query_cookie_loop :-
     read(X),
-    ( not(X == 0) ->
-    selected(X, cookies),nl,
-    assert(cookie(X)),
-    query_cookie_loop ;
-    true ).
-query_cookie :-
-    options(cookies),nl,
-    write('Please input your cookies (0 to end): '),nl,
-    query_cookie_loop.
+    ( not(X == 0) -> % if input is 0, proceed to next list
+        ( selected(X, cookies) -> % if true then proceed
+            nl, assert(cookie(X)) ;
+            write('Invalid option, try again!'),nl ), % else try again
+        query_cookie_loop ;
+        true ).
 query_addon_loop :-
     read(X),
-    ( not(X == 0) ->
-    selected(X, addons),nl,
-    assert(addon(X)),
-    query_addon_loop ;
-    true ).
-query_addon :-
-    options(addons),nl,
-    write('Please input your addons (0 to end): '),nl,
+    ( not(X == 0) -> % if input is 0, proceed to next list
+        ( selected(X, addons) -> % if true then proceed
+            nl, assert(addon(X)) ;
+            write('Invalid option, try again!'),nl ), % else try again            
+        query_addon_loop ;
+        true ).
+
+% Query for each type
+query_bread :- options(breads),nl,write('Please input your bread: '),nl,
+    query_bread_loop.
+query_main :- options(mains),nl,write('Please input your main: '),nl,
+    query_main_loop.
+query_cheese :- options(cheeses),nl,write('Please input your cheese: '),nl,
+    query_cheese_loop.
+query_veg :- options(vegs),nl,write('Please input your vegs (0 to end): '),nl,
+    query_veg_loop.
+query_sauce :- options(sauces),nl,write('Please input your sauces (0 to end): '),nl,
+    query_sauce_loop.
+query_cookie :- options(cookies),nl,write('Please input your cookies (0 to end): '),nl,
+    query_cookie_loop.
+query_addon :- options(addons),nl,write('Please input your addons (0 to end): '),nl,
     query_addon_loop.
 
 % Declare dynamic predicates to store results
-:- dynamic bread/1, main/1, cheese/1, veg/1, sauce/1, cookie/1, addon/1.
+:- dynamic meal/1, bread/1, main/1, cheese/1, veg/1, sauce/1, cookie/1, addon/1.
 
-% Display options.
-choices(Bread, Main, Cheese, Vegs, Sauces, Cookies, Addons) :-
+% Display selected options.
+choices(Meal, Bread, Main, Cheese, Vegs, Sauces, Cookies, Addons) :-
+    meal(Meal),
     bread(Bread),
     main(Main),
     cheese(Cheese),
@@ -81,7 +86,8 @@ choices(Bread, Main, Cheese, Vegs, Sauces, Cookies, Addons) :-
     findall(X, cookie(X), Cookies),
     findall(X, addon(X), Addons).
 display :-
-    choices(Bread, Main, Cheese, Vegs, Sauces, Cookies, Addons),
+    choices(Meal, Bread, Main, Cheese, Vegs, Sauces, Cookies, Addons),
+    write('Your meal type: '),write(Meal), nl,
     write('Your choices:'),nl,
     write('Bread: '), write(Bread), nl,
     write('Main: '), write(Main), nl,
@@ -121,10 +127,10 @@ meal_value :-
 exec:-
     write('Please choose your meal type (one of normal, veggie, vegan, value)?'),nl,
     read(Meal),
-    ( (Meal == veggie) -> meal_veggie ;
-        (Meal == vegan) -> meal_vegan ;
-            (Meal == value) -> meal_value ;
-                meal_normal), % normal by default
+    ( (Meal == veggie) -> meal_veggie, assert(meal(veggie)) ;
+        (Meal == vegan) -> meal_vegan, assert(meal(vegan)) ;
+            (Meal == value) -> meal_value, assert(meal(value)) ;
+                meal_normal, assert(meal(normal)) ), % normal by default
     write('----------------------------------------------'),nl,
     write('----------------------------------------------'),nl,
     display.    
