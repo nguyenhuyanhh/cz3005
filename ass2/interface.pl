@@ -136,6 +136,7 @@ exec:-
     display.    
 
 % Flush all choices from memory
+flush :- retract(meal(_)), fail.
 flush :- retract(bread(_)), fail.
 flush :- retract(main(_)), fail.
 flush :- retract(cheese(_)), fail.

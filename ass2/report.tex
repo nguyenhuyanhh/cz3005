@@ -64,4 +64,274 @@
     \end{center}
 \end{titlepage}
 
+\section*{Assignment 3: Subway sandwich interactor}
+
+In this assignment, a Prolog-based interactor would be implemented to mimic
+the Subway sandwich ordering experience. Customers would be able to customize
+their order from a predefined range of options.
+
+The implementation is split into two Prolog scripts, \texttt{subway.pl} which
+stores the Subway model and \texttt{interface.pl} which implements the
+interaction. The entry point to the implementation would be the predicate
+\texttt{start/0} in \texttt{interface.pl}.
+
+\subsection*{Model: \texttt{subway.pl}}
+
+The model in \texttt{subway.pl} includes the lists of options available as well
+as helper predicates \texttt{options/1} to display the lists and
+\texttt{selected/2} to choose a list option.
+
+\begin{lstlisting}
+% Display all options in a list
+options_list([]). % empty list
+options_list([H]) :- write(H), write('.'). % final list item
+options_list([H|T]) :- write(H), write(', '), options_list(T), !. % normal list
+options(breads):- breads(L), write('breads = '), options_list(L).
+options(mains):- mains(L), write('mains = '), options_list(L).
+options(cheeses):- cheeses(L), write('cheeses = '), options_list(L).
+options(vegs):- vegs(L), write('vegs = '), options_list(L).
+options(sauces):- sauces(L), write('sauces = '), options_list(L).
+options(cookies):- cookies(L), write('cookies = '), options_list(L).
+options(addons):- addons(L), write('addons = '), options_list(L).
+
+% Select an option
+selected(X, breads) :- breads(L), member(X, L), write('bread = '), write(X), !.
+selected(X, mains) :- mains(L), member(X, L), write('main = '), write(X), !.
+selected(X, cheeses) :- cheeses(L), member(X, L), write('cheese = '), write(X), !.
+selected(X, vegs) :- vegs(L), member(X, L), write('veg = '), write(X), !.
+selected(X, sauces) :- sauces(L), member(X, L), write('sauce = '), write(X), !.
+selected(X, cookies) :- cookies(L), member(X, L), write('cookie = '), write(X), !.
+selected(X, addons) :- addons(L), member(X, L), write('addon = '), write(X), !.
+
+% Lists of options
+breads([italian, heartyitalian, wheat, honeyoat, wholegrain, parmesan, flatbread, wrap, salad]).
+mains([ham, turkey, coldcut, bbqchicken, tuna, eggmayo, meatball]).
+cheeses([american, monterrey, none]).
+vegs([lettuce, tomato, cucumber, capsicum, onion, jalapeno, pickle, avocado]).
+sauces([bbq, honeymustard, mustard, sweetonion, redwine, mayonnaise, chipottle, ranch, vinegar]).
+cookies([chocchip, doublechoc, walnut, macnut, raspberry, brownie]).
+addons([drink, soup, chips]).
+\end{lstlisting}
+
+As seen above, the implementation of \texttt{options/1} uses an underlying 
+predicate \texttt{options\\\_list/1} to recursively \texttt{write} the list
+elements; it handles the special case of 1-element list (ending the text by
+using ``.'') and empty list (output nothing). The implementation of
+\texttt{selected/2} unifies the list with a variable \texttt{L}, then perform
+a member check and \texttt{write} the choice if true.
+
+\subsection*{Interactor: \texttt{interface.pl}}
+
+The interactor in \texttt{interface.pl} is written in pure Prolog, consisting
+of a series of predicates and prompts. The root predicates are \texttt{help/0}
+which prints out a small help text, and \texttt{start/0} which starts the
+interactive session.
+
+\begin{lstlisting}
+start :-
+    write('----------------------------------------------'),nl,
+    write('--------------------SUBWAY--------------------'),nl,
+    write('----------------------------------------------'),nl,
+    exec,
+    end.
+\end{lstlisting}
+
+The predicate \texttt{exec/0} is the analogous to a \texttt{main\,()} function for
+this interactor. It asks the user to choose a meal option, either normal, veggie,
+vegan or value; the corresponding \texttt{meal\_*/0} predicate is called and
+\texttt{meal\,/1} is asserted. 
+
+\begin{lstlisting}
+exec:-
+    write('Please choose your meal type (one of normal, veggie, vegan, value)?'),nl,
+    read(Meal),
+    ( (Meal == veggie) -> meal_veggie, assert(meal(veggie)) ;
+        (Meal == vegan) -> meal_vegan, assert(meal(vegan)) ;
+            (Meal == value) -> meal_value, assert(meal(value)) ;
+                meal_normal, assert(meal(normal)) ), % normal by default
+    write('----------------------------------------------'),nl,
+    write('----------------------------------------------'),nl,
+    display. 
+\end{lstlisting}
+
+Each \texttt{meal\_*/0} predicate is a collection of \texttt{query\_*/0} predicates
+in a specific order; each corresponding to a list in the model.
+
+\begin{lstlisting}
+meal_normal :-
+    query_bread, query_main, query_cheese, query_veg,
+    query_sauce, query_cookie, query_addon.
+meal_veggie :-
+    query_bread, query_veg,
+    query_sauce, query_cookie, query_addon.
+meal_vegan :-
+    query_bread, query_veg,
+    query_sauce, query_addon.
+meal_value :-
+    query_bread, query_main, query_cheese, query_veg,
+    query_sauce.
+\end{lstlisting}
+
+A \texttt{query\_*/0} predicate is implemented using a corresponding helper
+predicate \texttt{query\_*\_loop\\/0} that handles error-checking, multiple
+values and assertions.
+Input errors occur when the user input is not in the corresponding list; the
+predicate \texttt{selected/2} in the model would return \texttt{false} and a
+re-input prompt is printed out. For certain lists (\texttt{vegs}, \texttt{sauces},
+\texttt{cookies} and \texttt{addons}), there could be multiple values in an order;
+a sentinel value of \texttt{0} when entered will end the input list. Sample
+demonstrations are included below.
+
+\begin{lstlisting}
+query_bread_loop :-
+    read(X),
+    ( selected(X, breads) -> % if true then proceed
+        nl, assert(bread(X)) ;
+        write('Invalid option, try again!'),nl, % else try again 
+        query_bread_loop ).
+query_veg_loop :-
+    read(X),
+    ( not(X == 0) -> % if input is 0, proceed to next list
+        ( selected(X, vegs) -> % if true then proceed
+            nl, assert(veg(X)) ;
+            write('Invalid option, try again!'),nl ), % else try again         
+        query_veg_loop ;
+        true ).
+query_bread :- options(breads),nl,write('Please input your bread: '),nl,
+    query_bread_loop.
+query_veg :- options(vegs),nl,write('Please input your vegs (0 to end): '),nl,
+    query_veg_loop.
+\end{lstlisting}
+
+The final predicate in \texttt{exec/0}, \texttt{display/0} would display the final
+order made by the user. It is implemented using a helper predicate,
+\texttt{choices/8} which collects the various choices from \texttt{query\_*/0}
+predicates.
+
+\begin{lstlisting}
+choices(Meal, Bread, Main, Cheese, Vegs, Sauces, Cookies, Addons) :-
+    meal(Meal),
+    bread(Bread),
+    main(Main),
+    cheese(Cheese),
+    findall(X, veg(X), Vegs),
+    findall(X, sauce(X), Sauces),
+    findall(X, cookie(X), Cookies),
+    findall(X, addon(X), Addons).
+display :-
+    choices(Meal, Bread, Main, Cheese, Vegs, Sauces, Cookies, Addons),
+    write('Your meal type: '),write(Meal), nl,
+    write('Your choices:'),nl,
+    write('Bread: '), write(Bread), nl,
+    write('Main: '), write(Main), nl,
+    write('Cheese: '), write(Cheese), nl,
+    atomic_list_concat(Vegs, ',', Veg),
+    write('Vegs: '), write(Veg), nl,
+    atomic_list_concat(Sauces, ',', Sauce),
+    write('Sauces: '), write(Sauce), nl,
+    atomic_list_concat(Cookies, ',', Cookie),
+    write('Cookies: '), write(Cookie), nl,
+    atomic_list_concat(Addons, ',', Addon),
+    write('Addons: '), write(Addon), nl.
+\end{lstlisting}
+
+Finally, the final predicate in \texttt{start/0}, \texttt{end/0} would end the run
+and flush all choices from the system, using \texttt{retract/1}.
+
+\begin{lstlisting}
+flush :- retract(meal(_)), fail.
+flush :- retract(bread(_)), fail.
+flush :- retract(main(_)), fail.
+flush :- retract(cheese(_)), fail.
+flush :- retract(veg(_)), fail.
+flush :- retract(sauce(_)), fail.
+flush :- retract(cookie(_)), fail.
+flush :- retract(addon(_)), fail.
+
+end :-
+    write('----------------------------------------------'),nl,
+    write('------------------END-SUBWAY------------------'),nl,
+    write('----------------------------------------------'),
+    flush. % reset the system
+\end{lstlisting}
+
+\subsection*{Sample Interactor Run}
+
+The following snippet presents a sample run for the interactor.
+
+\begin{lstlisting}
+$ swipl
+Welcome to SWI-Prolog (threaded, 64 bits, version 7.6.2)
+SWI-Prolog comes with ABSOLUTELY NO WARRANTY. This is free software.
+Please run ?- license. for legal details.
+
+For online help and background, visit http://www.swi-prolog.org
+For built-in help, use ?- help(Topic). or ?- apropos(Word).
+
+?- ['interface.pl'].
+true.
+
+?- help.
+Enter start. to start the process.
+true.
+
+?- start.
+----------------------------------------------
+--------------------SUBWAY--------------------
+----------------------------------------------
+Please choose your meal type (one of normal, veggie, vegan, value)?
+|: normal.
+breads = italian, heartyitalian, wheat, honeyoat, wholegrain, parmesan, flatbread, wrap, salad.
+Please input your bread:
+|: italian.
+bread = italian
+mains = ham, turkey, coldcut, bbqchicken, tuna, eggmayo, meatball.
+Please input your main:
+|: hello.
+Invalid option, try again!
+|: ham.
+main = ham
+cheeses = american, monterrey, none.
+Please input your cheese:
+|: none.
+cheese = none
+vegs = lettuce, tomato, cucumber, capsicum, onion, jalapeno, pickle, avocado.
+Please input your vegs (0 to end):
+|: avocado.
+veg = avocado
+|: tomato.
+veg = tomato
+|: onion.
+veg = onion
+|: 0.
+sauces = bbq, honeymustard, mustard, sweetonion, redwine, mayonnaise, chipottle, ranch, vinegar.
+Please input your sauces (0 to end):
+|: bbq.
+sauce = bbq
+|: 0.
+cookies = chocchip, doublechoc, walnut, macnut, raspberry, brownie.
+Please input your cookies (0 to end):
+|: 0.
+addons = drink, soup, chips.
+Please input your addons (0 to end):
+|: drink.
+addon = drink
+|: 0.
+----------------------------------------------
+----------------------------------------------
+Your meal type: normal
+Your choices:
+Bread: italian
+Main: ham
+Cheese: none
+Vegs: avocado,tomato,onion
+Sauces: bbq
+Cookies:
+Addons: drink
+----------------------------------------------
+------------------END-SUBWAY------------------
+----------------------------------------------
+false.
+\end{lstlisting}
+
 \end{document}
